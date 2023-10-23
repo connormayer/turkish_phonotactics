@@ -1,0 +1,8 @@
+- do we control for fronting of velar consonants adjacent to front vowels? Similar for light vs. dark l
+	- ask Cem & Defne about this. What happens in CVCVC when first vowel is front and second is back, e.g.
+
+- do we control for no voiced sounds in coda? This occurs in loanwords
+
+- do we control for no r word-initially? This occurs in loanwords
+
+- talk to Cem & Defne about IPA for Turkish
