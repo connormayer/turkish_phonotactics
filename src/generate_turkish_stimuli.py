@@ -49,7 +49,7 @@ front_vowels = [
     'i',
     'y', # ü
     'e',
-    'œ', # ö
+    'ø', # ö
 ]
 
 back_vowels = [
