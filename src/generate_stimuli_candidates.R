@@ -1,8 +1,6 @@
 library(RANN)
 library(tidyverse)
 
-setwd("E:/git_repos/turkish_phonotactics")
-
 full_candidates <- read_csv("data/turkish_phonotactic_judgments/stimuli_candidates_scored.csv") %>%
   mutate(vowels = str_trim(str_replace_all(word, "[^iyeøɯuao]", ''))) %>%
   mutate(vowels = map_chr(

@@ -1,8 +1,5 @@
 library(tidyverse)
 
-#setwd("C:/Users/conno/git_repos/turkish_phonotactics")
-setwd("E:/git_repos/turkish_phonotactics")
-
 ########################################################
 # TASK 1: Get a list of all the suffixed forms in TELL #
 ########################################################
