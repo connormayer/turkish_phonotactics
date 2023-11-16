@@ -16,7 +16,7 @@ from tempfile import gettempdir
 session = Session(profile_name="default")
 polly = session.client("polly")
 
-file = "data/turkish_phonotactic_judgments/candidates_ortho_v2.csv"
+file = "data/turkish_phonotactic_judgments/candidates_ortho_v3.csv"
 with open(file) as f:
     df = pd.read_csv(file)
 
@@ -28,7 +28,7 @@ for _, row in df.iterrows():
     try:
         # Request speech synthesis
         response = polly.synthesize_speech(
-            Engine = 'neural',
+            Engine = 'standard',
             LanguageCode = 'tr-TR',
             Text="<speak><phoneme alphabet='ipa' ph='{}'>Blah</phoneme></speak>".format(word), 
             OutputFormat="mp3",

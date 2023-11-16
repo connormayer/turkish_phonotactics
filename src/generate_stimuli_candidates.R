@@ -72,6 +72,7 @@ full_tokens %>%
 # Final sanitation
 j_words <- full_tokens %>% 
   filter(str_starts(word, 'ʒ'))
+
 bogus_words <- c(
   'n i l i m',
   'b u ɟ ø z',
@@ -80,6 +81,11 @@ bogus_words <- c(
   'k a ɾ a n',
   'ɫ o t u s',
   j_words$word
+)
+
+later_bogus_words <- c(
+  's a ɫ a n',
+  'm a ɾ a n'
 )
 
 new_tokens <- tibble(full_tokens)
@@ -100,7 +106,7 @@ for (word_str in bogus_words) {
   closest_i <- 2
   while (!found_point) {
     closest <- full_candidates[closest_idx[closest_i],]
-    if (nrow((anti_join(closest, new_tokens, by="word"))) == 0 | (closest$word %in% bogus_words) | str_starts(closest$word, 'ʒ')) {
+    if (nrow((anti_join(closest, new_tokens, by="word"))) == 0 | (closest$word %in% bogus_words) | (closest$word %in% later_bogus_words) | str_starts(closest$word, 'ʒ')) {
       # Closest point is already in our sample or is 
       # another bogus word 
       closest_i = closest_i + 1
@@ -133,11 +139,11 @@ convert_to_ortho <- function(df) {
 }
 
 new_full_tokens_ortho <- convert_to_ortho(new_tokens) %>% 
-  write_csv('data/turkish_phonotactic_judgments/candidates_ortho_v2.csv')
+  write_csv('data/turkish_phonotactic_judgments/candidates_ortho_v3.csv')
 
 new_tokens_diff <- new_full_tokens_ortho %>% 
-  filter(!(word %in% full_tokens_ortho$word)) %>%
-  write_csv('data/turkish_phonotactic_judgments/candidates_ortho_v2_diff.csv')
+  filter(!(word %in% full_tokens$word)) %>%
+  write_csv('data/turkish_phonotactic_judgments/candidates_ortho_v3_diff.csv')
 
 # Check that tokens are roughly evenly distributed in unigram/bigram space
 new_tokens %>%
