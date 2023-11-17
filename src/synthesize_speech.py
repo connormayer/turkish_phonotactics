@@ -23,14 +23,17 @@ with open(file) as f:
 filenames = []
 
 for _, row in df.iterrows():
-    word = ''.join((row['word'].split(' ')))
+    with_stress = row['word'].split(' ')
+    # All words are CVCVC, so stress on final is 3rd position
+    with_stress.insert(2, 'ˈ')
+    word = ''.join(with_stress)
     print(word)
     try:
         # Request speech synthesis
         response = polly.synthesize_speech(
             Engine = 'standard',
             LanguageCode = 'tr-TR',
-            Text="<speak><phoneme alphabet='ipa' ph='{}'>Blah</phoneme></speak>".format(word), 
+            Text="<speak><prosody rate='slow'><phoneme alphabet='ipa' ph='{}'>Blah</phoneme></prosody></speak>".format(word), 
             OutputFormat="mp3",
             VoiceId="Filiz",
             TextType="ssml"
