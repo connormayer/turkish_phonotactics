@@ -153,7 +153,12 @@ new_tokens_diff <- new_full_tokens_ortho %>%
 new_tokens %>%
   ggplot() +
   geom_point(aes(x=uni_prob, y=bi_prob_smoothed)) +
-  facet_wrap(~vowels)
+  facet_wrap(~vowels) +
+  xlab("Log unigram probability") + 
+  ylab("Log smoothed bigram probability") +
+  theme_minimal()
+
+ggsave("figs/stimuli.png")
 
 # Find poik equivalent
 poik_df <- full_candidates %>%
