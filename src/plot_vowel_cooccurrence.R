@@ -1,9 +1,14 @@
 library(tidyverse)
+library(tidytext)
+library(viridis)
 
-citation_corpus <- read_csv('data/vowel_only_citation.csv', col_names = 'word')
+citation_corpus <- read_csv('data/vowel_only_citation.csv', col_names = 'word') %>%
+  mutate(word = str_c('x ', word, ' x'))
+
 citation_bigrams <- citation_corpus %>%
   unnest_tokens(bigram, word, token = 'ngrams', n = 2) %>%
-  filter(!is.na(bigram))
+  filter(!is.na(bigram)) %>%
+  mutate(bigram = str_replace(bigram, 'x', '#'))
 
 counts <- citation_bigrams %>%
   group_by(bigram) %>%
@@ -14,8 +19,18 @@ counts <- citation_bigrams %>%
          attested = c_prob > 0) %>%
   ungroup() %>%
   mutate(j_prob = count / sum(count),
-         v1 = fct_relevel(v1, c('ɯ', 'u', 'a', 'o', 'i', 'y', 'e', 'ø')),
-         v2 = fct_relevel(v2, c('ɯ', 'u', 'a', 'o', 'i', 'y', 'e', 'ø')))
+         v1 = fct_relevel(v1, c('#', 'ɯ', 'u', 'a', 'o', 'i', 'y', 'e', 'ø')),
+         v2 = fct_relevel(v2, c('#', 'ɯ', 'u', 'a', 'o', 'i', 'y', 'e', 'ø')),
+         quantile = ntile(c_prob, 100),
+         q_10 = quantile < 10,
+         q_20 = quantile < 20,
+         q_30 = quantile < 30,
+         q_40 = quantile < 40,
+         q_50 = quantile < 50,
+         q_60 = quantile < 60,
+         q_70 = quantile < 70,
+         q_80 = quantile < 80,
+         q_90 = quantile < 90)
 
 counts %>%
   ggplot(aes(x=v1, y=v2)) +
@@ -49,7 +64,7 @@ counts %>%
 ggsave('figs/turkish_joint_probs.png')
 
 counts %>%
-  ggplot(aes(x=v1, y=v2)) +
+  ggplot(aes(x=x1, y=x2)) +
   geom_tile(aes(fill = c_prob)) +
   geom_text(aes(label = round(c_prob, 3))) +
   xlab("First vowel") +

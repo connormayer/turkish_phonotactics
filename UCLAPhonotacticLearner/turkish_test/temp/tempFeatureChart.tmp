@@ -1,0 +1,10 @@
+Segments
+#	 { +word_boundary, 0front, 0high, 0round, }
+o	 { -word_boundary, -front, -high, +round, }
+U	 { -word_boundary, -front, +high, -round, }
+u	 { -word_boundary, -front, +high, +round, }
+e	 { -word_boundary, +front, -high, -round, }
+O	 { -word_boundary, +front, -high, +round, }
+i	 { -word_boundary, +front, +high, -round, }
+y	 { -word_boundary, +front, +high, +round, }
+a	 { -word_boundary, -front, -high, -round, }
