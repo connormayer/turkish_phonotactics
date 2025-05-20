@@ -1,4 +1,5 @@
-# This script generates all possible Turkish CVCVC words
+# This script generates all possible Turkish CVCVC words, subject to
+# a couple restrictions.
 import csv
 import pandas as pd
 

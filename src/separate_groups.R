@@ -1,5 +1,8 @@
 library(tidyverse)
 
+# This script does some spreadsheet formatting to set groups up properly
+# in Gorilla.
+
 # Run this after synthesizing speech
 df <- read_csv('data/stimuli_with_filenames.csv')
 df$display <- 'Task'

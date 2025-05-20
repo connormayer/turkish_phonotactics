@@ -1,5 +1,8 @@
 library(tidyverse)
 
+# This script processes the TELL corpus into the format we need,
+# as well as extracting some statistics about vowel harmony.
+
 ########################################################
 # TASK 1: Get a list of all the suffixed forms in TELL #
 ########################################################

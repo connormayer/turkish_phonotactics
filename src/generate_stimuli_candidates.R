@@ -1,6 +1,9 @@
 library(RANN)
 library(tidyverse)
 
+# This script samples from the space of stimuli candidates and chooses
+# some that are more or less evenly distributed. It also does a bunch of 
+# manual error filtering.
 full_candidates <- read_csv("data/turkish_phonotactic_judgments/stimuli_candidates_scored.csv") %>%
   mutate(vowels = str_trim(str_replace_all(word, "[^iyeøɯuao]", ''))) %>%
   mutate(vowels = map_chr(
@@ -152,13 +155,18 @@ new_tokens_diff <- new_full_tokens_ortho %>%
 # Check that tokens are roughly evenly distributed in unigram/bigram space
 new_tokens %>%
   ggplot() +
-  geom_point(aes(x=uni_prob, y=bi_prob_smoothed)) +
+  geom_point(aes(x=uni_prob, y=bi_prob_smoothed), size=3) +
   facet_wrap(~vowels) +
   xlab("Log unigram probability") + 
   ylab("Log smoothed bigram probability") +
-  theme_minimal()
+  theme_minimal() +
+  theme(axis.text = element_text(size=10),
+        axis.title = element_text(size=20),
+        legend.text = element_text(size=12),
+        legend.title = element_text(size=20),
+        strip.text = element_text(size=18))
 
-ggsave("figs/stimuli.png")
+ggsave("figs/stimuli.png", height=10, width=8, unit='in')
 
 # Find poik equivalent
 poik_df <- full_candidates %>%

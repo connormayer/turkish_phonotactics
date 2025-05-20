@@ -2,6 +2,8 @@ library(tidyverse)
 library(tidytext)
 library(viridis)
 
+# Script that calculates correlations and visualizes experiment results.
+
 # Read in experimental results
 file_dir <- "results/real_results"
 #Read read in the filenames of all files from the naming task
@@ -39,6 +41,18 @@ for (filename in filenames) {
   }
 }
 
+exclude_participants <- background %>% 
+  select(`Participant Private ID`, `response-aoa`, `response-native`,
+         `response-impairment`, `response-where`) %>%
+  filter(`response-aoa` > 5 | `response-impairment` == 'Evet') 
+
+good_participants <- background %>%
+  filter(!(`Participant Private ID` %in% exclude_participants))
+
+good_participants %>% 
+  group_by(`response-gender`) %>% 
+  summarize(n())
+
 # Clean up column names
 task <- task %>% 
   rename(ID = `Participant Private ID`,
@@ -56,8 +70,13 @@ task <- task %>%
          group = group)
 
 task_responses <- task %>%
-  filter(zone == "response_slider_endValue") %>%
+  filter(zone == "response_slider_endValue" & 
+           !(ID %in% exclude_participants$`Participant Private ID`)) %>%
   mutate(response = as.numeric(response))
+
+# task_responses %>%
+#   select(ID, response, word) %>%
+#   write_csv('data/turkish_responses_phonotactics_paper.csv') 
 
 front_vowels <- "[iyeø]" 
 back_vowels <- "[ɯuao]"
@@ -103,7 +122,6 @@ vowel_scores <- read_csv("data/vowel_scores_citation.csv") %>%
 task_responses <- task_responses %>%
   inner_join(vowel_scores, by='vowels')
 
-# TODO: Neighborhood density
 # Scale both unigram and bigram probability
 stats_data <- task_responses %>%
   mutate(z_v_bi_prob_smoothed = as.vector(scale(v_bi_prob_smoothed)),
@@ -172,7 +190,7 @@ add_threshold_violations <- function(counts, cor_data) {
     print(row_idx)
     row <- cor_data[row_idx,]
     padded_row <- row %>%
-      mutate(vowels = str_c('x ', str_replace(vowels, '(.)(.)', '\\1 \\2'), ' x')) %>% 
+      mutate(vowels = str_c('x ',  str_replace(vowels, '(.)(.)', '\\1 \\2'), ' x')) %>% 
       ungroup()
     
     token_bigrams <- padded_row %>%
@@ -249,297 +267,87 @@ add_threshold_violations <- function(counts, cor_data) {
 
 cor_data <- add_threshold_violations(counts, cor_data)
 
-hw_data <- read_tsv('UCLAPhonotacticLearner/turkish_test/output/blickTestResults.txt', col_names = FALSE) %>%
-  select(X1, X2) %>%
-  transmute(vowels = str_replace(X1, ' ', ''),
-            hw_score = as.numeric(X2))
-
-cor_data_hw <- inner_join(cor_data, hw_data, by='vowels')
-
-cor(cor_data_hw$z_mean_response, -cor_data_hw$hw_score, method='pearson')
-cor(cor_data_hw$z_mean_response, -cor_data_hw$hw_score, method='kendall')
-cor(cor_data_hw$z_mean_response, -cor_data_hw$hw_score, method='spearman')
-
+# Probability model in paper
 cor(cor_data$z_mean_response, cor_data$z_v_bi_prob_smoothed, method='pearson')
 cor(cor_data$z_mean_response, cor_data$z_v_bi_prob_smoothed, method='kendall')
 cor(cor_data$z_mean_response, cor_data$z_v_bi_prob_smoothed, method='spearman')
 
+# Boolean harmony model in paper
 cor(cor_data$z_mean_response, cor_data$back_and_round_harmonic, method='pearson')
 cor(cor_data$z_mean_response, cor_data$back_and_round_harmonic, method='kendall')
 cor(cor_data$z_mean_response, cor_data$back_and_round_harmonic, method='spearman')
 
+# Cost harmony model in paper
 cor(cor_data$z_mean_response, cor_data$back_round_gradient, method='pearson')
 cor(cor_data$z_mean_response, cor_data$back_round_gradient, method='kendall')
 cor(cor_data$z_mean_response, cor_data$back_round_gradient, method='spearman')
 
-cor(cor_data$z_mean_response, cor_data$back_round_o_harmonic, method='pearson')
-cor(cor_data$z_mean_response, cor_data$back_round_o_harmonic, method='kendall')
-cor(cor_data$z_mean_response, cor_data$back_round_o_harmonic, method='spearman')
-
-cor(cor_data$z_mean_response, cor_data$back_round_o_gradient, method='pearson')
-cor(cor_data$z_mean_response, cor_data$back_round_o_gradient, method='kendall')
-cor(cor_data$z_mean_response, cor_data$back_round_o_gradient, method='spearman')
-
+# Threshold models
 cor(cor_data$z_mean_response, cor_data$q_10_harmonic, method='pearson')
 cor(cor_data$z_mean_response, cor_data$q_10_harmonic, method='kendall')
 cor(cor_data$z_mean_response, cor_data$q_10_harmonic, method='spearman')
-
-cor(cor_data$z_mean_response, cor_data$q_10_gradient, method='pearson')
-cor(cor_data$z_mean_response, cor_data$q_10_gradient, method='kendall')
-cor(cor_data$z_mean_response, cor_data$q_10_gradient, method='spearman')
 
 cor(cor_data$z_mean_response, cor_data$q_20_harmonic, method='pearson')
 cor(cor_data$z_mean_response, cor_data$q_20_harmonic, method='kendall')
 cor(cor_data$z_mean_response, cor_data$q_20_harmonic, method='spearman')
 
-cor(cor_data$z_mean_response, cor_data$q_20_gradient, method='pearson')
-cor(cor_data$z_mean_response, cor_data$q_20_gradient, method='kendall')
-cor(cor_data$z_mean_response, cor_data$q_20_gradient, method='spearman')
-
 cor(cor_data$z_mean_response, cor_data$q_30_harmonic, method='pearson')
 cor(cor_data$z_mean_response, cor_data$q_30_harmonic, method='kendall')
 cor(cor_data$z_mean_response, cor_data$q_30_harmonic, method='spearman')
 
-cor(cor_data$z_mean_response, cor_data$q_30_gradient, method='pearson')
-cor(cor_data$z_mean_response, cor_data$q_30_gradient, method='kendall')
-cor(cor_data$z_mean_response, cor_data$q_30_gradient, method='spearman')
-
+# This is the best performing threshold model reported in the paper.
 cor(cor_data$z_mean_response, cor_data$q_40_harmonic, method='pearson')
 cor(cor_data$z_mean_response, cor_data$q_40_harmonic, method='kendall')
 cor(cor_data$z_mean_response, cor_data$q_40_harmonic, method='spearman')
-
-cor(cor_data$z_mean_response, cor_data$q_40_gradient, method='pearson')
-cor(cor_data$z_mean_response, cor_data$q_40_gradient, method='kendall')
-cor(cor_data$z_mean_response, cor_data$q_40_gradient, method='spearman')
 
 cor(cor_data$z_mean_response, cor_data$q_50_harmonic, method='pearson')
 cor(cor_data$z_mean_response, cor_data$q_50_harmonic, method='kendall')
 cor(cor_data$z_mean_response, cor_data$q_50_harmonic, method='spearman')
 
-cor(cor_data$z_mean_response, cor_data$q_50_gradient, method='pearson')
-cor(cor_data$z_mean_response, cor_data$q_50_gradient, method='kendall')
-cor(cor_data$z_mean_response, cor_data$q_50_gradient, method='spearman')
-
 cor(cor_data$z_mean_response, cor_data$q_60_harmonic, method='pearson')
 cor(cor_data$z_mean_response, cor_data$q_60_harmonic, method='kendall')
 cor(cor_data$z_mean_response, cor_data$q_60_harmonic, method='spearman')
-
-cor(cor_data$z_mean_response, cor_data$q_60_gradient, method='pearson')
-cor(cor_data$z_mean_response, cor_data$q_60_gradient, method='kendall')
-cor(cor_data$z_mean_response, cor_data$q_60_gradient, method='spearman')
 
 cor(cor_data$z_mean_response, cor_data$q_70_harmonic, method='pearson')
 cor(cor_data$z_mean_response, cor_data$q_70_harmonic, method='kendall')
 cor(cor_data$z_mean_response, cor_data$q_70_harmonic, method='spearman')
 
-cor(cor_data$z_mean_response, cor_data$q_70_gradient, method='pearson')
-cor(cor_data$z_mean_response, cor_data$q_70_gradient, method='kendall')
-cor(cor_data$z_mean_response, cor_data$q_70_gradient, method='spearman')
-
 cor(cor_data$z_mean_response, cor_data$q_80_harmonic, method='pearson')
 cor(cor_data$z_mean_response, cor_data$q_80_harmonic, method='kendall')
 cor(cor_data$z_mean_response, cor_data$q_80_harmonic, method='spearman')
-
-cor(cor_data$z_mean_response, cor_data$q_80_gradient, method='pearson')
-cor(cor_data$z_mean_response, cor_data$q_80_gradient, method='kendall')
-cor(cor_data$z_mean_response, cor_data$q_80_gradient, method='spearman')
 
 cor(cor_data$z_mean_response, cor_data$q_90_harmonic, method='pearson')
 cor(cor_data$z_mean_response, cor_data$q_90_harmonic, method='kendall')
 cor(cor_data$z_mean_response, cor_data$q_90_harmonic, method='spearman')
 
-cor(cor_data$z_mean_response, cor_data$q_90_gradient, method='pearson')
-cor(cor_data$z_mean_response, cor_data$q_90_gradient, method='kendall')
-cor(cor_data$z_mean_response, cor_data$q_90_gradient, method='spearman')
-
+# Boolean exception model
 cor(cor_data$z_mean_response, cor_data$dai_values, method='pearson')
 cor(cor_data$z_mean_response, cor_data$dai_values, method='kendall')
 cor(cor_data$z_mean_response, cor_data$dai_values, method='spearman')
-
-cor(cor_data$z_v_bi_prob_smoothed, cor_data$q_40_harmonic, method='pearson')
-cor(cor_data$z_v_bi_prob_smoothed, cor_data$q_40_harmonic, method='kendall')
-cor(cor_data$z_v_bi_prob_smoothed, cor_data$q_40_harmonic, method='spearman')
-
-cor(cor_data$z_v_bi_prob_smoothed, cor_data$back_and_round_harmonic, method='pearson')
-cor(cor_data$z_v_bi_prob_smoothed, cor_data$back_and_round_harmonic, method='kendall')
-cor(cor_data$z_v_bi_prob_smoothed, cor_data$back_and_round_harmonic, method='spearman')
 
 #########
 # PLOTS #
 #########
 
-stats_data %>%
-  ggplot(aes(x=back_round_gradient, y=response, group=back_round_gradient)) + 
-  geom_boxplot()
-
-stats_data %>%
-  ggplot(aes(x=back_and_round_harmonic, y=response, group=back_and_round_harmonic)) + 
-  geom_boxplot()
-
-stats_data %>%
-  ggplot(aes(x=back_harmonic, y=response, group=back_harmonic)) + 
-  geom_boxplot()
-
-stats_data %>%
-  ggplot(aes(x=round_harmonic, y=response, group=round_harmonic)) + 
-  geom_boxplot()
-
-plot_data <- cor_data %>% 
-  group_by(vowels, z_v_bi_prob_smoothed) %>%
-  summarize(mean_response = mean(z_response),
-            mean_v_pred = mean(model_v_pred),
-            mean_harmonic_pred = mean(model_harmonic_pred))
+plot_data <- cor_data %>%
+  mutate(Harmony = ifelse(back_and_round_harmonic, 'back and round',
+                    ifelse(back_harmonic, 'back only',
+                           ifelse(round_harmonic, 'round only',
+                                  'neither'))),
+         Harmony = factor(Harmony, levels = c('back and round', 'round only', 'back only', 'neither')))
 
 plot_data %>%
-  ggplot(aes(x=z_v_bi_prob_smoothed, y=mean_response, label=vowels)) + 
-  geom_point() + 
-  geom_label()
-
-plot_data %>%
-  ggplot(aes(x=mean_response, y=mean_harmonic_pred)) + 
-  geom_point()
-
-
-task_responses <- task_responses %>%
-  mutate(v_group = case_when(v_bi_prob_smoothed > mean(v_bi_prob_smoothed) + sd(v_bi_prob_smoothed) ~ 'high',
-                             v_bi_prob_smoothed < mean(v_bi_prob_smoothed) - sd(v_bi_prob_smoothed) ~ 'low',
-                             TRUE ~ 'average'))
-
-task_responses %>%
-  arrange(-response) %>%
-  ggplot(aes(x=fct_reorder(vowels, response), y=response, fill=back_harmonic)) +
-  geom_boxplot()
-
-task_responses %>%
-  arrange(-response) %>%
-  ggplot(aes(x=back_harmonic, y=response, fill=back_harmonic)) +
-  geom_boxplot()
-
-task_responses %>%
-  ggplot(aes(x=uni_prob, y=response)) +
-  geom_point(aes(color=back_harmonic, size=3)) +
-  geom_smooth(method='lm')
-
-task_responses %>%
-  ggplot(aes(x=bi_prob_smoothed, y=response)) +
-  geom_point(aes(color=back_harmonic), size=3) +
-  geom_smooth(method='lm')
-
-task_responses %>%
-  arrange(-response) %>%
-  ggplot(aes(x=height_harmonic, y=response, fill=height_harmonic)) +
-  geom_boxplot()
-
-task_responses %>%
-  arrange(-response) %>%
-  ggplot(aes(x=round_harmonic, y=response, fill=round_harmonic)) +
-  geom_boxplot()
-
-task_responses %>%
-  ggplot(aes(x=v_uni_prob, y=response)) +
-  geom_point(aes(color=back_harmonic, size=3)) +
-  geom_smooth(method='lm')
-
-task_responses %>%
-  ggplot(aes(x=v_bi_prob_smoothed, y=response)) +
-  geom_point(aes(color=back_harmonic), size=3) +
-  geom_smooth(method='lm')
-
-
-task_responses %>% 
-  group_by(orthography, uni_prob, bi_prob_smoothed, harmonic) %>%
-  summarize(response = mean(response)) %>%
-  ggplot() +
-  aes(x = uni_prob, y = response, group = harmonic, color = harmonic) +
-  geom_point(color = "grey", alpha = .7) +
-  geom_smooth(method = "lm")
-
-task_responses %>% 
-  group_by(orthography, uni_prob, bi_prob_smoothed, harmonic) %>%
-  summarize(response = mean(response)) %>%
-  ggplot() +
-  aes(x = bi_prob_smoothed, y = response, group = harmonic, color = harmonic) +
-  geom_point(color = "grey", alpha = .7) +
-  geom_smooth(method = "lm")
-
-cor_data %>%
-  ggplot(aes(x=z_v_bi_prob_smoothed, y=z_mean_response)) +
-  geom_point() +
-  geom_smooth(method = 'lm') +
-  geom_label(aes(label=vowels)) +   
+  ggplot(aes(x=Harmony, y = z_mean_response, fill=Harmony)) +
+  geom_boxplot() +
   theme_minimal() +
-  theme(axis.text = element_text(size=20),
-        axis.title = element_text(size=20),
+  theme(axis.text = element_text(size=27),
+        axis.title = element_text(size=30),
         legend.text = element_text(size=12),
         legend.title = element_text(size=20)) +
-  xlab("Bigram probability (z-score)") +
-  ylab("Mean response (z-score)")
-ggsave("figs/bigram_prob_plot.png")
-
-cor_data %>%
-  ggplot(aes(x=back_and_round_harmonic, y=z_mean_response, fill=back_and_round_harmonic)) +
-  geom_violin() +
-  geom_boxplot(width=0.1) +
-  #geom_smooth(method = 'lm') +
-  #geom_label(aes(label=vowels)) +   
-  theme_minimal() +
-  theme(axis.text = element_text(size=20),
-        axis.title = element_text(size=20),
-        legend.text = element_text(size=12),
-        legend.title = element_text(size=20)) +
-  xlab("Accepted?") +
-  ylab("Mean response (z-score)") +
-  guides(fill="none") 
-ggsave("figs/categorical_prob_plot.png")
-
-cor_data %>%
-  ggplot(aes(x=q_40_harmonic, y=z_mean_response, fill=q_40_harmonic)) +
-  geom_violin() +
-  geom_boxplot(width=0.1) +
-  #geom_smooth(method = 'lm') +
-  #geom_label(aes(label=vowels)) +   
-  theme_minimal() +
-  theme(axis.text = element_text(size=20),
-        axis.title = element_text(size=20),
-        legend.text = element_text(size=12),
-        legend.title = element_text(size=20)) +
-  xlab("Accepted?") +
-  ylab("Mean response (z-score)") +
-  guides(fill="none") 
-ggsave("figs/threshold_prob_plot.png")
-
-cor_data %>%
-  ggplot(aes(x=dai_values, y=z_mean_response, fill=dai_values)) +
-  geom_violin() +
-  geom_boxplot(width=0.1) +
-  #geom_smooth(method = 'lm') +
-  #geom_label(aes(label=vowels)) +   
-  theme_minimal() +
-  theme(axis.text = element_text(size=20),
-        axis.title = element_text(size=20),
-        legend.text = element_text(size=12),
-        legend.title = element_text(size=20)) +
-  xlab("Accepted?") +
-  ylab("Mean response (z-score)") +
-  guides(fill="none") 
-ggsave("figs/dai_prob_plot.png")
-
-
-cor_data %>%
-  ggplot(aes(x=as.factor(back_round_gradient), y=z_mean_response, fill=back_and_round_harmonic)) +
-  geom_violin() +
-  geom_boxplot(width=0.1) +
-  #geom_smooth(method = 'lm') +
-  #geom_label(aes(label=vowels)) +   
-  theme_minimal() +
-  theme(axis.text = element_text(size=20),
-        axis.title = element_text(size=20),
-        legend.text = element_text(size=12),
-        legend.title = element_text(size=20)) +
-  xlab("Cost") +
-  ylab("Mean response (z-score)") +
-  guides(fill="none") 
-ggsave("figs/cost_prob_plot.png", units = 'in', width=6, height=4)
+  xlab("Harmonic category") +
+  ylab("Mean response (z-score)") + 
+  scale_fill_discrete(guide="none")
+ggsave("figs/responses_plot.png", width=12, height=6, unit='in')
 
 counts %>%
   ggplot(aes(x=x1, y=x2)) +
@@ -598,20 +406,6 @@ counts %>%
         legend.title = element_text(size=20))
 ggsave("figs/probability_constraints.png", units = 'in', width=8, height=4)
 
-counts %>%
-  ggplot(aes(x=x1, y=x2)) +
-  geom_tile(aes(fill = as.factor(back_round_gradient))) +
-  geom_text(aes(label = back_round_gradient)) +
-  xlab("First segment") +
-  ylab("Second segment") +
-  scale_fill_viridis(option = "D", name = "Constraint value", discrete = TRUE) +
-  theme_minimal() +
-  theme(axis.text = element_text(size=20),
-        axis.title = element_text(size=20),
-        legend.text = element_text(size=12),
-        legend.title = element_text(size=20))
-ggsave("figs/gradient_harmonic_constraints.png")
-
 
 counts %>%
   ggplot(aes(x=x1, y=x2)) +
@@ -619,24 +413,11 @@ counts %>%
   geom_text(aes(label = back_round_gradient)) +
   xlab("First segment") +
   ylab("Second segment") +
-  scale_fill_viridis(option = "D", name = "Constraint value", discrete = TRUE) +
+  scale_fill_viridis(option = "D", name = "# violations", discrete = TRUE,
+                     direction = -1) +
   theme_minimal() +
   theme(axis.text = element_text(size=20),
         axis.title = element_text(size=20),
         legend.text = element_text(size=12),
         legend.title = element_text(size=20))
-ggsave("figs/gradient_harmonic_constraints.png")
-
-counts %>%
-  ggplot(aes(x=x1, y=x2)) +
-  geom_tile(aes(fill = as.factor(back_round_gradient))) +
-  geom_text(aes(label = back_round_gradient)) +
-  xlab("First segment") +
-  ylab("Second segment") +
-  scale_fill_viridis(option = "D", name = "Constraint value", discrete = TRUE) +
-  theme_minimal() +
-  theme(axis.text = element_text(size=20),
-        axis.title = element_text(size=20),
-        legend.text = element_text(size=12),
-        legend.title = element_text(size=20))
-ggsave("figs/gradient_harmonic_constraints.png")
+ggsave("figs/gradient_harmonic_constraints.png", units = 'in', width=8, height=4)

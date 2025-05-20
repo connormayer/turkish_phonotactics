@@ -2,6 +2,7 @@ library(tidyverse)
 library(tidytext)
 library(viridis)
 
+# This script makes some of the semiring plots used in Mayer (2025).
 citation_corpus <- read_csv('data/vowel_only_citation.csv', col_names = 'word') %>%
   mutate(word = str_c('x ', word, ' x'))
 

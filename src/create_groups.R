@@ -1,6 +1,6 @@
 library(tidyverse)
 
-
+# Separates stimuli into groups to be used in between-subjects design.
 scores_df <- read_csv("data/turkish_phonotactic_judgments/stimuli_candidates_scored.csv") %>%
   select(word, uni_prob, bi_prob, bi_prob_smoothed, pos_uni_score, pos_bi_score, 
          pos_uni_score_smoothed, pos_bi_score_smoothed)
