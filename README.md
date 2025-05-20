@@ -4,13 +4,13 @@ This repo contains the code used to generate, run and analyze a phonotactic
 acceptability judgment task done on Turkish. The task is described in 
 
 Mayer, C. (in press). Reconciling gradient and categorical models of phonotactics. 
-**Proceedings of the Society for Computation in Linguistics.** 
+*Proceedings of the Society for Computation in Linguistics.*
 
 The data are also used in
 
 Mayer, C., Kondur, A., and Sundara, M. (under review). The UCI Phonotactic 
 Calculator: An online tool for computing phonotactic metrics. 
-**Behavior Research Methods.**
+*Behavior Research Methods.*
 
 If you use this data, please cite one or both of these papers.
 
