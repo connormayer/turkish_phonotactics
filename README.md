@@ -1,4 +1,4 @@
-# turkish_phonotactics
+# Turkish Phonotactic Acceptability
 
 This repo contains the code used to generate, run and analyze a phonotactic
 acceptability judgment task done on Turkish. The task is described in 
