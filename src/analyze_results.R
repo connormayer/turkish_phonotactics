@@ -1,6 +1,7 @@
 library(tidyverse)
 library(tidytext)
 library(viridis)
+library(lme4)
 
 # Script that calculates correlations and visualizes experiment results.
 
@@ -272,6 +273,14 @@ cor(cor_data$z_mean_response, cor_data$z_v_bi_prob_smoothed, method='pearson')
 cor(cor_data$z_mean_response, cor_data$z_v_bi_prob_smoothed, method='kendall')
 cor(cor_data$z_mean_response, cor_data$z_v_bi_prob_smoothed, method='spearman')
 
+cor(cor_data$z_mean_response, cor_data$v_bi_prob_smoothed, method='pearson')
+cor(cor_data$z_mean_response, cor_data$v_bi_prob_smoothed, method='kendall')
+cor(cor_data$z_mean_response, cor_data$v_bi_prob_smoothed, method='spearman')
+
+cor(cor_data$z_mean_response, exp(cor_data$v_bi_prob_smoothed), method='pearson')
+cor(cor_data$z_mean_response, exp(cor_data$v_bi_prob_smoothed), method='kendall')
+cor(cor_data$z_mean_response, exp(cor_data$v_bi_prob_smoothed), method='spearman')
+
 # Boolean harmony model in paper
 cor(cor_data$z_mean_response, cor_data$back_and_round_harmonic, method='pearson')
 cor(cor_data$z_mean_response, cor_data$back_and_round_harmonic, method='kendall')
@@ -324,6 +333,22 @@ cor(cor_data$z_mean_response, cor_data$q_90_harmonic, method='spearman')
 cor(cor_data$z_mean_response, cor_data$dai_values, method='pearson')
 cor(cor_data$z_mean_response, cor_data$dai_values, method='kendall')
 cor(cor_data$z_mean_response, cor_data$dai_values, method='spearman')
+
+model_data <- stats_data %>%
+  group_by(ID) %>%
+  mutate(z_response = as.vector(scale(response))) %>%
+  inner_join(
+    cor_data %>% select(vowels, q_40_harmonic)
+  )
+
+logprob_m <- lmer(response ~ z_v_bi_prob_smoothed + (1 + z_v_bi_prob_smoothed|ID) + (1|word), data=model_data)
+prob_m <- lmer(response ~ v_bi_prob_smoothed + (1|ID) + (1|word), data=model_data)
+dai_m <- lmer(response ~ dai_values + (1 + dai_values|ID) + (1|word), data=model_data)
+quant_m <- lmer(response ~ q_40_harmonic + (1|ID) + (1|word), data=model_data)
+cost_m <- lmer(response ~ back_round_gradient + (1|ID) + (1|word), data=model_data)
+bool_m <- lmer(response ~ back_and_round_harmonic + (1 + back_and_round_harmonic|ID) + (1|word), data=model_data)
+
+AIC(logprob_m, prob_m, dai_m, quant_m, cost_m, bool_m)
 
 #########
 # PLOTS #
