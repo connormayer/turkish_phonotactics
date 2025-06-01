@@ -341,14 +341,14 @@ model_data <- stats_data %>%
     cor_data %>% select(vowels, q_40_harmonic)
   )
 
-logprob_m <- lmer(response ~ z_v_bi_prob_smoothed + (1 + z_v_bi_prob_smoothed|ID) + (1|word), data=model_data)
+logprob_m <- lmer(response ~ z_v_bi_prob_smoothed + (1|ID) + (1|word), data=model_data)
 prob_m <- lmer(response ~ v_bi_prob_smoothed + (1|ID) + (1|word), data=model_data)
-dai_m <- lmer(response ~ dai_values + (1 + dai_values|ID) + (1|word), data=model_data)
+dai_m <- lmer(response ~ dai_values + (1|ID) + (1|word), data=model_data)
 quant_m <- lmer(response ~ q_40_harmonic + (1|ID) + (1|word), data=model_data)
 cost_m <- lmer(response ~ back_round_gradient + (1|ID) + (1|word), data=model_data)
-bool_m <- lmer(response ~ back_and_round_harmonic + (1 + back_and_round_harmonic|ID) + (1|word), data=model_data)
+bool_m <- lmer(response ~ back_and_round_harmonic + (1|ID) + (1|word), data=model_data)
 
-AIC(logprob_m, prob_m, dai_m, quant_m, cost_m, bool_m)
+anova(logprob_m, prob_m, dai_m, quant_m, cost_m, bool_m)
 
 #########
 # PLOTS #
